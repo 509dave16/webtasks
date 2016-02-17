@@ -1,0 +1,72 @@
+"use latest";
+
+/**
+ * @file A small webtask.io service that exposes two api actions that utilize the "themoviedb" api's "/discover/movie" action.
+ * @author David Fall
+ */
+
+var Webtask = require('webtask-tools');
+var Express = require('express');
+var request = require('request@2.56.0');
+
+var app = Express();
+var theMovieDbBaseUrl = 'https://api.themoviedb.org/3';
+var theMovieDbApiKey=undefined;
+
+app.use(require('body-parser').json());
+
+//Assign secret api key to a global file variable
+app.use(function (req,res,next) {
+    theMovieDbApiKey = req.webtaskContext.data.THE_MOVIE_DB_API_KEY;
+    next();
+});
+
+//Retrieve results for most popular movies of a particular year
+app.get('/most-popular/:year', function (req, res) {
+    var year = req.params.year;
+    var url = discoverMovieBy({
+        'primary_release_year': year,
+        'sort_by': 'popularity.desc'
+    });
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            res.send(body);
+        } else {
+            throw error;
+        }
+    });
+});
+
+//Retrieve results for most grossing movies of a particular year
+app.get('/most-revenue/:year', function (req, res) {
+    var year = req.params.year;
+    var url = discoverMovieBy({
+        'primary_release_year': year,
+        'sort_by': 'revenue.desc'
+    });
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            res.send(body);
+        } else {
+            throw error;
+        }
+    });
+});
+
+/**
+ * Based on the passed in 'params' object a url is built for a discover
+ * movie request.
+ * 
+ * @param {mixed} params - The query string parameters to be used in the discover movie request url.
+ */
+function discoverMovieBy(params) {
+    let url = `${theMovieDbBaseUrl}/discover/movie?`;
+    for (let key in params) {
+        let value = params[key];
+        url += `${key}=${value}&`;
+    }
+    url += `api_key=${theMovieDbApiKey}`;
+    return url;
+}
+
+module.exports = Webtask.fromExpress(app);
