@@ -5,17 +5,17 @@
  * @author David Fall
  */
 
-var Webtask = require('webtask-tools');
-var Express = require('express');
-var request = require('request@2.56.0');
+let Webtask = require('webtask-tools');
+let Express = require('express');
+let request = require('request@2.56.0');
 
-var app = Express();
-var theMovieDbBaseUrl = 'https://api.themoviedb.org/3';
-var theMovieDbApiKey=undefined;
+let app = Express();
+let theMovieDbBaseUrl = 'https://api.themoviedb.org/3';
+let theMovieDbApiKey=undefined;
 
 app.use(require('body-parser').json());
 
-//Assign secret api key to a global file variable
+//Assign secret api key to a global file letiable
 app.use(function (req,res,next) {
     theMovieDbApiKey = req.webtaskContext.data.THE_MOVIE_DB_API_KEY;
     next();
@@ -23,8 +23,8 @@ app.use(function (req,res,next) {
 
 //Retrieve results for most popular movies of a particular year
 app.get('/most-popular/:year', function (req, res) {
-    var year = req.params.year;
-    var url = discoverMovieBy({
+    let year = req.params.year;
+    let url = discoverMovieBy({
         'primary_release_year': year,
         'sort_by': 'popularity.desc'
     });
@@ -39,8 +39,8 @@ app.get('/most-popular/:year', function (req, res) {
 
 //Retrieve results for most grossing movies of a particular year
 app.get('/most-revenue/:year', function (req, res) {
-    var year = req.params.year;
-    var url = discoverMovieBy({
+    let year = req.params.year;
+    let url = discoverMovieBy({
         'primary_release_year': year,
         'sort_by': 'revenue.desc'
     });
